@@ -35,7 +35,7 @@ class Account(Base):
         return account
 
 
-class Category(Base):
+class CategoryModel(Base):
     """
     The class describes the relationship category
     :param - base class that all related classes inherit from
@@ -52,7 +52,7 @@ class Category(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class LevelCategory(Base):
+class LevelCategoryModel(Base):
     """
     The class describes the relationship levelcategory
     :param - base class that all related classes inherit from
