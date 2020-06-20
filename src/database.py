@@ -1,10 +1,19 @@
+"""
+module for connecting to the database
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
 class AlchemyORM:
     """
-    Класс для работы с alchemy orm db
+    class for working with database
+    :methods:
+    __init__ - class constructor
+    init_app - entry point
+    connection - connection to the database
+    _connect - method for getting location and connecting to the database
+    close_db - close database
     """
     def __init__(self, app=None):
         self._session = None

@@ -13,7 +13,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class Account(Base):
+class AccountModel(Base):
     """
     The class describes the relationship account
     :param - base class that all related classes inherit from
@@ -69,7 +69,7 @@ class LevelCategoryModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Operation(Base):
+class OperationModel(Base):
     """
     The class describes the relationship operation
     :param - base class that all related classes inherit from
