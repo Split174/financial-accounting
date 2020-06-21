@@ -16,5 +16,5 @@ def auth_required(view_func):
         user_id = session.get('user_id')
         if user_id is None:
             return {"answer": "Авторизуйтесь"}, 401
-        return view_func(*args, **kwargs)
+        return view_func(*args, **kwargs, user_id=user_id)
     return wrapper
