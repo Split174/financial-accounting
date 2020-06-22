@@ -15,6 +15,7 @@ from marshmallow import ValidationError
 from database import db
 from services.auth import AuthService
 from flask.views import MethodView
+from services.auth import UserNotFoundOrInfidelsData
 
 bp = Blueprint('auth', __name__)
 
@@ -33,8 +34,12 @@ class UserLogin(MethodView):
             return jsonify(ValEr.messages), 400
 
         auth_service = AuthService(db.connection)
-        auth_user = auth_service.post_auth(auth)
-        return auth_user
+        try:
+            auth_user = auth_service.post_auth(auth)
+        except UserNotFoundOrInfidelsData:
+            return {"answer": "Данного пользователя не существует"
+                              " или введены неверные данные"}, 400
+        return auth_user, 200
 
 
 class UserLogout(MethodView):
@@ -45,7 +50,7 @@ class UserLogout(MethodView):
     """
     def post(self):
         session.pop('user_id', None)
-        return {"answer": "Выход из аккаунта произведен"}
+        return {"answer": "Выход из аккаунта произведен"}, 200
 
 
 bp.add_url_rule('/login', view_func=UserLogin.as_view('auth_login'))
