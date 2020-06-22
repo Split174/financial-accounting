@@ -1,7 +1,7 @@
 """
 module contains the main exception for inheritance
 """
-class SeviceError(Exception):
+class ServiceError(Exception):
     """
     The main exception for inheritance
     """

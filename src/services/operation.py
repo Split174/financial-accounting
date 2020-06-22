@@ -12,11 +12,11 @@ from entities.operation import GetOperation, UpdateOperation, Operation
 from dataclasses import asdict
 from sqlalchemy import and_
 from datetime import datetime
-from exceptions import SeviceError
+from exceptions import ServiceError
 import time
 
 
-class OperationDataError(SeviceError):
+class OperationDataError(ServiceError):
     """
     class exception with incorrect data
     """
