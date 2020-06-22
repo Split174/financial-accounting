@@ -1,3 +1,6 @@
+"""
+The module implements category entities
+"""
 from dataclasses import dataclass
 from typing import Optional, List, Any
 
@@ -8,14 +11,13 @@ class CategoryBase:
 
 
 @dataclass
-class CategoryCreate(CategoryBase):
-    parent_id: Optional[int] = None
+class Category(CategoryBase):
     id: Optional[int] = None
-    parent_name: Optional[str] = None
+    parent_id: Optional[int] = None
 
 
 @dataclass
 class CategoryTree(CategoryBase):
     id: int
-    children: Optional[List[Any]] # TODO лучше избавиться от Any
+    children: Optional[List[Any]]  # TODO лучше избавиться от Any и как-то сослаться на этот же класс
 
