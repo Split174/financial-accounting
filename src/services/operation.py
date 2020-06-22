@@ -64,8 +64,10 @@ class OperationServices:
         self.operation_id = operation_id
 
     def post_operation(self, operation: Operation) -> GetOperation:
-        cur_time = int(time.mktime(
-            time.strptime(str(operation.datetime), '%Y-%m-%d %H:%M:%S')))
+        cur_time = operation.datetime
+        if type(operation.datetime) != int:
+            cur_time = int(time.mktime(
+                time.strptime(str(operation.datetime), '%Y-%m-%d %H:%M:%S')))
 
         if operation.category_id is not None:
             category = self.session.query(CategoryModel).filter \
@@ -131,8 +133,6 @@ class OperationServices:
         return {"answer": "Операция удалена"}
 
     def get_operation(self) -> GetOperation:
-        print(self.operation_id)
-        print(self.user_id)
         operation = self.session.query(OperationModel).filter \
             (and_(OperationModel.id == self.operation_id,
                   OperationModel.user_id == self.user_id)).first()
