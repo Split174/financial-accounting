@@ -6,11 +6,11 @@ UserService - class for registering and getting a user
 from models import AccountModel
 from werkzeug.security import generate_password_hash
 from flask import session
-from exceptions import SeviceError
+from exceptions import ServiceError
 from entities.user import UserCreate, User
 
 
-class UserError(SeviceError):
+class UserError(ServiceError):
     """
     class for inherit exception
     """

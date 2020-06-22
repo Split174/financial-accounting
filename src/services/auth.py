@@ -6,11 +6,11 @@ AuthService - this class allows produce authorization
 from models import AccountModel
 from flask import session
 from werkzeug.security import check_password_hash
-from exceptions import SeviceError
+from exceptions import ServiceError
 from entities.auth import Auth
 
 
-class AuthError(SeviceError):
+class AuthError(ServiceError):
     """
     class error auth for inherit
     """

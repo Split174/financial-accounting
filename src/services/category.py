@@ -49,7 +49,7 @@ class CategoryService:
         self.session.commit()
         return Category(id=new_category.id, name=new_category.name, parent_id=category.parent_id)
 
-    def change_category(self, category: Category) -> Category:
+    def change_category(self, category: Category) -> Category:  # TODO рефакторинг нужен
         """
         Category change
         :param category: Category
@@ -62,7 +62,11 @@ class CategoryService:
             raise CategoryAlredyExist()
 
         changed_category: CategoryModel = self.__change_category_name(category.id, category.name)
-        return Category(name=changed_category.name, id=changed_category.id)
+        parent = self.session.query(LevelCategoryModel)\
+            .filter(LevelCategoryModel.children_id == changed_category.id).first()
+        if parent is not None:
+            parent = parent.parent_id
+        return Category(name=changed_category.name, id=changed_category.id, parent_id=parent)
 
     def delete_category(self, category_id: int) -> NoReturn:
         """

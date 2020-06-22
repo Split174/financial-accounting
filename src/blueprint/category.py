@@ -28,8 +28,7 @@ class CategoryView(MethodView):
     get - get all tree category
     """
     @auth_required
-    def post(self):
-        user_id = session.get('user_id')
+    def post(self, user_id):
         request_json = request.json
         try:
             category_data = create_category_schema.load(request_json)
@@ -46,8 +45,7 @@ class CategoryView(MethodView):
             return jsonify({"answer": "Категории с таким parent_id не существует"}), 400
 
     @auth_required
-    def get(self):
-        user_id = session.get('user_id')
+    def get(self, user_id):
         category_service = CategoryService(db.connection, user_id)
         forest = category_service.get_all_tree()
         return jsonify(category_tree_schema.dump(forest, many=True)), 200
@@ -62,8 +60,7 @@ class CategoryPatchGetDeleteView(MethodView):
     delete - del category
     """
     @auth_required
-    def patch(self, category_id):
-        user_id = session.get('user_id')
+    def patch(self, category_id, user_id):
         request_json = request.json
         request_json["id"] = category_id  # TODO выглядит как костыль
         try:
@@ -81,8 +78,7 @@ class CategoryPatchGetDeleteView(MethodView):
             return jsonify({"answer": "Данной категории не существует"}), 400
 
     @auth_required
-    def get(self, category_id):
-        user_id = session.get('user_id')
+    def get(self, category_id, user_id):
         try:
             category_service = CategoryService(db.connection, user_id)
             tree = category_service.get_category_tree(category_id)
@@ -91,8 +87,7 @@ class CategoryPatchGetDeleteView(MethodView):
             return jsonify({"answer": "Данной категории не существует"}), 400
 
     @auth_required
-    def delete(self, category_id):
-        user_id = session.get('user_id')
+    def delete(self, category_id, user_id):
         try:
             category_service = CategoryService(db.connection, user_id)
             category_service.delete_category(category_id)
