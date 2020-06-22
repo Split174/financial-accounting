@@ -9,7 +9,7 @@ Operation - describes the ratio operation
 """
 from sqlalchemy import Column, Integer, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.event import listens_for
 Base = declarative_base()
 
 
@@ -62,8 +62,8 @@ class LevelCategoryModel(Base):
     """
     __tablename__ = 'levelcategory'
     id = Column(Integer, primary_key=True)
-    parent_id = Column(Integer, ForeignKey('category.id'))
-    children_id = Column(Integer, ForeignKey('category.id'))
+    parent_id = Column(Integer, ForeignKey('category.id', ondelete='CASCADE'))
+    children_id = Column(Integer, ForeignKey('category.id', ondelete='CASCADE'))
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
