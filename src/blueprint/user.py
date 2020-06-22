@@ -12,9 +12,9 @@ from flask import (
 )
 from flask.views import MethodView
 from database import db
-from services.user import UserService as UserService
+from services.user import UserService
 from auth_required import auth_required
-
+from services.user import ThisEmailAlreadyUse
 bp = Blueprint('user', __name__)
 
 
@@ -24,6 +24,7 @@ class UserView(MethodView):
     :methods:
     post - receives user data and registers him
     get - returns user data
+    user id - id user in session, in this place is a stub
     """
     def post(self):
         request_json = request.json
@@ -32,11 +33,14 @@ class UserView(MethodView):
         except ValidationError as ValidEr:
             return jsonify(ValidEr.messages), 400
         service = UserService(db.connection)
-        user = service.post_user(user=user)
-        return user
+        try:
+            user = service.post_user(user=user)
+        except ThisEmailAlreadyUse:
+            return {"answer": "Данный email уже используется"}, 400
+        return user, 201
 
     @auth_required
-    def get(self):
+    def get(self, user_id):
         service = UserService(db.connection)
         user = service.get_user()
         user_return = scheme.user.get_user_schema.dump(user)
