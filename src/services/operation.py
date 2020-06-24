@@ -11,9 +11,7 @@ from models import OperationModel, CategoryModel
 from entities.operation import GetOperation, UpdateOperation, Operation
 from dataclasses import asdict
 from sqlalchemy import and_
-from datetime import datetime
 from exceptions import ServiceError
-import time
 
 
 class OperationDataError(ServiceError):
@@ -23,99 +21,89 @@ class OperationDataError(ServiceError):
     service = 'operation'
 
 
-class InsertDataFaled(OperationDataError):
+class EntityDoesNotExistError(OperationDataError):
     """
-    class exception input data
+    class with the exception of a nonexistent entity
     """
-    pass
-
-
-class OperationOrCategoryNotFound(OperationDataError):
-    """
-    class exception when not found category or operation
-    """
-    pass
+    message = {"answer": "Cущности не существует"}, 404
 
 
 class OperationServices:
     """
     сlass implements business logic various methods
-    :methods:
-    __init__ - class constructor
-    :param:
-    self.session - connect to db
-    self.user_id - user id in session
-    self.operation_id - input operation id
-
-    post_operation - adds operation to db
-    :param:
-    operation - received data
-
-    patch_operation - update record operation in db
-    :param:
-    operation - received data
-
-    del_operation - delete record operation in db
-    get_operation - get record operation in db
     """
     def __init__(self, session, user_id=None, operation_id=None):
+        """
+        __init__ - class constructor
+        :param session: connect to db
+        :param user_id: user id in session
+        :param operation_id: input operation id
+        """
         self.session = session
         self.user_id = user_id
         self.operation_id = operation_id
 
-    def post_operation(self, operation: Operation) -> GetOperation:
-        cur_time = operation.datetime
-        if type(operation.datetime) != int:
-            cur_time = int(time.mktime(
-                time.strptime(str(operation.datetime), '%Y-%m-%d %H:%M:%S')))
-
+    def create_operation(self, operation: Operation) -> GetOperation:
+        """
+        create_operation - adds operation to db
+        :param operation: received data
+        :return: dataclass with operation data
+        """
         if operation.category_id is not None:
-            category = self.session.query(CategoryModel).filter \
-                (and_(CategoryModel.id == operation.category_id,
-                      CategoryModel.user_id == self.user_id)).first()
-            if category is None:
-                raise InsertDataFaled()
+            category = (
+                self.session.query(CategoryModel)
+                    .filter(and_(
+                            CategoryModel.id == operation.category_id,
+                            CategoryModel.user_id == self.user_id))
+                    .first())
 
-        new_operation = OperationModel(amount=(operation.amount * 100),
+            if category is None:
+                raise EntityDoesNotExistError()
+
+        new_operation = OperationModel(amount=(int(operation.amount * 100)),
                                        description=operation.description,
-                                       datetime=cur_time,
+                                       datetime=operation.datetime,
                                        type_operation=operation.type_operation,
                                        user_id=self.user_id,
                                        category_id=operation.category_id)
+
         self.session.add(new_operation)
         self.session.commit()
         self.operation_id = new_operation.as_dict().get('id')
         return self.get_operation()
 
-    def patch_operation(self, operation: UpdateOperation) -> GetOperation:
+    def update_operation(self, operation: UpdateOperation) -> GetOperation:
+        """
+        update_operation - update record operation in db
+        :param operation: received data
+        :return: dataclass with operation data
+        """
         category = True
         dict_operation = asdict(operation)
         dict_operation = {key: val for key, val in dict_operation.items()
                           if val is not None}
 
-        operation = self.session.query(OperationModel).filter \
-            (and_(OperationModel.id == self.operation_id,
-                  OperationModel.user_id == self.user_id)).first()
+        operation = (
+            self.session.query(OperationModel)
+                .filter(and_(
+                        OperationModel.id == self.operation_id,
+                        OperationModel.user_id == self.user_id))
+                .first())
 
         if dict_operation.get('category_id') is not None:
-            category = self.session.query(CategoryModel).filter \
+            category = (
+                self.session.query(CategoryModel).filter
                 (and_(CategoryModel.id == dict_operation.get('category_id'),
                       CategoryModel.user_id == self.user_id)).first()
+            )
 
         if operation is None or category is None:
-            raise OperationOrCategoryNotFound()
+            raise EntityDoesNotExistError()
 
         if dict_operation.get('amount') is not None:
-            amount = dict_operation.get('amount') * 100
+            amount = int(dict_operation.get('amount') * 100)
             del dict_operation['amount']
             dict_operation.update({'amount': amount})
-
-        if dict_operation.get('datetime') is not None:
-            cur_time = int(time.mktime(
-                time.strptime(str(dict_operation.get('datetime')),
-                              '%Y-%m-%d %H:%M:%S')))
-            del dict_operation['datetime']
-            dict_operation.update({'datetime': cur_time})
 
         for key, value in dict_operation.items():
             setattr(operation, key, value)
@@ -123,34 +111,46 @@ class OperationServices:
         return self.get_operation()
 
     def del_operation(self) -> dict:
-        operation = self.session.query(OperationModel).filter \
-            (and_(OperationModel.id == self.operation_id,
-                  OperationModel.user_id == self.user_id)).delete()
+        """
+        del_operation - delete record operation in db
+        :return: message dictionary
+        """
+        operation = (
+            self.session.query(OperationModel)
+                .filter(and_(
+                        OperationModel.id == self.operation_id,
+                        OperationModel.user_id == self.user_id))
+                .delete())
+
         self.session.commit()
         if bool(operation) is False:
-            raise OperationOrCategoryNotFound()
+            raise EntityDoesNotExistError()
 
         return {"answer": "Операция удалена"}
 
     def get_operation(self) -> GetOperation:
-        operation = self.session.query(OperationModel).filter \
-            (and_(OperationModel.id == self.operation_id,
-                  OperationModel.user_id == self.user_id)).first()
+        """
+        get_operation - get record operation in db
+        :return: dataclass with operation data
+        """
+        operation = (
+            self.session.query(OperationModel)
+                .filter(and_(
+                        OperationModel.id == self.operation_id,
+                        OperationModel.user_id == self.user_id))
+                .first())
+
         if operation is None:
-            raise OperationOrCategoryNotFound()
-        str_time = time.strftime("%m-%d-%Y %H:%M:%S",
-                                 time.localtime(operation.datetime))
-        datetime_str = datetime.strptime(str_time, "%m-%d-%Y %H:%M:%S")
+            raise EntityDoesNotExistError()
+
         dict_operation = operation.as_dict()
         dict_operation['amount'] = dict_operation.get('amount')/100
-        del dict_operation['datetime']
-        dict_operation.update({'datetime': str_time})
 
         return GetOperation(
             type_operation=dict_operation.get('type_operation'),
             amount=dict_operation.get('amount'),
             category_id=dict_operation.get('category_id'),
-            datetime=datetime_str,
+            datetime=dict_operation.get('datetime'),
             description=dict_operation.get('description'),
             id=dict_operation.get('id'),
             user_id=dict_operation.get('user_id')

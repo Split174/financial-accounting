@@ -7,9 +7,8 @@ Category - describes the ratio сategory
 LevelCategory - describes the ratio levelcategory
 Operation - describes the ratio operation
 """
-from sqlalchemy import Column, Integer, Text, ForeignKey
+from sqlalchemy import Column, Integer, Text, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.event import listens_for
 Base = declarative_base()
 
 
@@ -81,7 +80,7 @@ class OperationModel(Base):
     id = Column(Integer, primary_key=True)
     amount = Column(Integer)
     description = Column(Text)
-    datetime = Column(Integer)
+    datetime = Column(DateTime(timezone=True))
     type_operation = Column(Text)
     user_id = Column(Integer, ForeignKey('account.id'))
     category_id = Column(Integer, ForeignKey('category.id'))
