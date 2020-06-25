@@ -5,21 +5,9 @@ BaseSchema - parent class to inherit
 UserAuthSchema - class for validating registration data
 GetUserAuthSchema - the class validates and passes data
 """
-from marshmallow import Schema, fields, validate, post_load
+from marshmallow import fields, validate
 from entities.user import UserCreate, User
-
-
-class BaseSchema(Schema):
-    """
-    BaseSchema - class for validating authorization data
-    :methods:
-    make_object - transfers data to convert to dataclass
-    """
-    __entity_class__ = None
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return self.__entity_class__(**data)
+from scheme.base_scheme import BaseSchema
 
 
 class UserAuthSchema(BaseSchema):
@@ -38,10 +26,10 @@ class GetUserAuthSchema(BaseSchema):
     AuthSchema - class for validating getting user data
     """
     __entity_class__ = User
-    id = fields.Integer(required=True)
-    email = fields.Email(required=True)
-    first_name = fields.String(required=True)
-    last_name = fields.String(required=True)
+    id = fields.Integer()
+    email = fields.Email()
+    first_name = fields.String()
+    last_name = fields.String()
 
 
 get_user_schema = GetUserAuthSchema()
