@@ -7,7 +7,7 @@ CategoryService - implement service category
 from exceptions import ServiceError
 from models import CategoryModel, LevelCategoryModel
 from entities.category import Category, CategoryTree
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from typing import Optional, List, NoReturn
 
 
@@ -173,7 +173,7 @@ class CategoryService:
     def __get_category_model_by_name(self, name: str) -> Optional[CategoryModel]:
         """get category model by NAME"""
         return self.session.query(CategoryModel).filter(
-            and_(CategoryModel.name == name,
+            and_(func.lower(CategoryModel.name) == name.lower(),
                  CategoryModel.user_id == self.user_id)).first()
 
     def __change_category_name(self, category_id: int,
