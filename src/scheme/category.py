@@ -8,10 +8,11 @@ from marshmallow import Schema, fields, post_load, validates, ValidationError
 from database import db
 from models import CategoryModel
 from entities.category import Category, CategoryTree
+from scheme.base_scheme import BaseSchema
 from typing import Any
 
 
-class CreateCategorySchema(Schema):
+class CreateCategorySchema(BaseSchema):
     """validating a category and converting it to json"""
     __entity_class__ = Category
 
@@ -19,14 +20,17 @@ class CreateCategorySchema(Schema):
     name = fields.String(required=True)
     parent_id = fields.Integer(missing=None)
 
-    @post_load
-    def make_object(self, data, **kwargs):
-        if self.__entity_class__:
-            return self.__entity_class__(**data)
-        return data
+
+class CategoryChangeSchema(BaseSchema):
+    """validating a category and converting it to json"""
+    __entity_class__ = Category
+
+    id = fields.Integer()
+    name = fields.String(missing=None)
+    parent_id = fields.Integer(missing=-1)
 
 
-class CategoryTreeSchema(Schema):
+class CategoryTreeSchema(BaseSchema):
     """class to convert category tree to json"""
     __entity_class__ = CategoryTree
 
@@ -34,12 +38,7 @@ class CategoryTreeSchema(Schema):
     name = fields.String(required=True)
     children = fields.Nested("CategoryTreeSchema", many=True)
 
-    @post_load
-    def make_object(self, data, **kwargs):
-        if self.__entity_class__:
-            return self.__entity_class__(**data)
-        return data
-
 
 create_category_schema = CreateCategorySchema()
+change_category_schema = CategoryChangeSchema()
 category_tree_schema = CategoryTreeSchema()

@@ -19,5 +19,5 @@ class Category(CategoryBase):
 @dataclass
 class CategoryTree(CategoryBase):
     id: int
-    children: Optional[List[Any]]  # TODO лучше избавиться от Any и как-то сослаться на этот же класс
+    children: Optional[List['CategoryTree']]
 
