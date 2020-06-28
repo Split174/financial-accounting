@@ -1,8 +1,8 @@
 """
 The module implements routing for categories
 :classes:
-CategoryView - add category and show all categories
-CategoryPatchGetDeleteView - change category, get tree category and delete tree category
+CategoriesView - add category and show all categories
+CategoryView - change category, get tree category and delete tree category
 """
 from flask import (
     Blueprint,
@@ -12,15 +12,15 @@ from flask import (
 )
 from flask.views import MethodView
 from marshmallow import ValidationError
-from scheme.category import create_category_schema, category_tree_schema
-from services.category import CategoryService, CategoryAlredyExist, CategoryIdDoesNotExist
+from scheme.category import create_category_schema, category_tree_schema, change_category_schema
+from services.category import CategoryService, CategoryAlredyExist, CategoryIdDoesNotExist, CategoryParentDoesNotExist
 from database import db
 from auth_required import auth_required
 
 bp = Blueprint('categories', __name__)
 
 
-class CategoryView(MethodView):
+class CategoriesView(MethodView):
     """
     the class implements routing of creation and output of all categories
     :methods:
@@ -51,7 +51,7 @@ class CategoryView(MethodView):
         return jsonify(category_tree_schema.dump(forest, many=True)), 200
 
 
-class CategoryPatchGetDeleteView(MethodView):
+class CategoryView(MethodView):
     """
     the class implements routing for editing, receiving and deleting a category
     :methods:
@@ -64,7 +64,7 @@ class CategoryPatchGetDeleteView(MethodView):
         request_json = request.json
         request_json["id"] = category_id  # TODO выглядит как костыль
         try:
-            category_data = create_category_schema.load(request_json)
+            category_data = change_category_schema.load(request_json)
         except ValidationError as e:
             return jsonify({"answer": "Ошибка в запросе"}), 400
 
@@ -76,6 +76,8 @@ class CategoryPatchGetDeleteView(MethodView):
             return jsonify({"answer": "Данное название занято"}), 400
         except CategoryIdDoesNotExist:
             return jsonify({"answer": "Данной категории не существует"}), 400
+        except CategoryParentDoesNotExist:
+            return jsonify({"answer": "Такой родительской категории не существует"}), 400
 
     @auth_required
     def get(self, category_id, user_id):
@@ -96,5 +98,5 @@ class CategoryPatchGetDeleteView(MethodView):
             return jsonify({"answer": "Данной категории не существует"}), 400
 
 
-bp.add_url_rule('', view_func=CategoryView.as_view('categories'))
-bp.add_url_rule('/<int:category_id>', view_func=CategoryPatchGetDeleteView.as_view('category_patch'))
+bp.add_url_rule('', view_func=CategoriesView.as_view('categories'))
+bp.add_url_rule('/<int:category_id>', view_func=CategoryView.as_view('category_patch'))
