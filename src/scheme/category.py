@@ -4,12 +4,9 @@ The module implements marshmallow schemes for data validation
 CreateCategorySchema - class for validating a category and converting it to json
 CategoryTreeSchema - class to convert category tree to json
 """
-from marshmallow import Schema, fields, post_load, validates, ValidationError
-from database import db
-from models import CategoryModel
+from marshmallow import fields
 from entities.category import Category, CategoryTree
 from scheme.base_scheme import BaseSchema
-from typing import Any
 
 
 class CreateCategorySchema(BaseSchema):

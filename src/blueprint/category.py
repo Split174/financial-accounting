@@ -12,8 +12,15 @@ from flask import (
 )
 from flask.views import MethodView
 from marshmallow import ValidationError
-from scheme.category import create_category_schema, category_tree_schema, change_category_schema
-from services.category import CategoryService, CategoryAlredyExist, CategoryIdDoesNotExist, CategoryParentDoesNotExist
+from scheme.category import (
+    create_category_schema,
+    category_tree_schema,
+    change_category_schema)
+from services.category import (
+    CategoryService,
+    CategoryAlredyExist,
+    CategoryIdDoesNotExist,
+    CategoryParentDoesNotExist)
 from database import db
 from auth_required import auth_required
 
