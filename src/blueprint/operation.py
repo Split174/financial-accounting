@@ -37,7 +37,7 @@ class OperationView(MethodView):
         try:
             operation_return = services.create_operation(operation)
         except EntityDoesNotExistError as entity_er:
-            return entity_er.message
+            return entity_er.message, 404
         operation_return = get_operation_schema.dump(operation_return)
         return jsonify(operation_return), 200
 
@@ -59,7 +59,7 @@ class OperationView(MethodView):
         try:
             operation_return = services.update_operation(operation)
         except EntityDoesNotExistError as entity_er:
-            return entity_er.message
+            return entity_er.message, 404
         operation_return = get_operation_schema.dump(operation_return)
         return jsonify(operation_return), 200
 
@@ -76,7 +76,7 @@ class OperationView(MethodView):
         try:
             operation_return = services.del_operation()
         except EntityDoesNotExistError as entity_er:
-            return entity_er.message
+            return entity_er.message, 404
         return operation_return, 200
 
     @auth_required
@@ -92,7 +92,7 @@ class OperationView(MethodView):
         try:
             operation_return = services.get_operation()
         except EntityDoesNotExistError as entity_er:
-            return entity_er.message
+            return entity_er.message, 404
         operation_return = get_operation_schema.dump(operation_return)
         return jsonify(operation_return), 200
 
