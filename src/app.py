@@ -7,7 +7,7 @@ from blueprint.category import bp as bp_category
 from blueprint.user import bp as bp_user
 from blueprint.auth import bp as bp_auth
 from blueprint.operation import bp as bp_operation
-
+from blueprint.report import bp as bp_report
 
 def create_app():
     """
@@ -19,6 +19,7 @@ def create_app():
     app.register_blueprint(bp_user, url_prefix='/user')
     app.register_blueprint(bp_auth, url_prefix='/auth')
     app.register_blueprint(bp_operation, url_prefix='/operation')
+    app.register_blueprint(bp_report, url_prefix='/report')
     db.init_app(app)
     return app
 
