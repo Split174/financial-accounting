@@ -16,7 +16,7 @@ class AuthError(ServiceError):
     service = 'auth'
 
 
-class UserNotFoundOrInfidelsData(AuthError):
+class UserNotFoundOrInvalidData(AuthError):
     """
     class for exception, Invalid data or user does not exist
     """
