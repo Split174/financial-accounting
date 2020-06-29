@@ -22,19 +22,21 @@ class Report:
     ready_date: [str]
 
 
+@dataclass
+class Report:
+    result_sum: Decimal
+    operation: List["ReportOperation"]
 
 
 @dataclass
-class ReportReturn:
-
+class ReportOperation:
     amount: Decimal
     description: str
     datetime: datetime
-    category: List['Category']
-    result_sum: Decimal
+    category: List["Category"]
 
 
 @dataclass
-class Category:
-    id: Dict[int]
-    name: Dict[str]
+class CategoryOperation:
+    id: int
+    name: str

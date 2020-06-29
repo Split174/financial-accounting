@@ -15,8 +15,9 @@ import time
 from dateutil.relativedelta import relativedelta
 from src.ready_date import get_date
 import calendar
-from entities.report import ReportReturn
+from entities.report import Report, ReportOperation, CategoryOperation
 from src.exceptions import ServiceError
+from typing import List
 
 
 class ReportDataError(ServiceError):
@@ -100,34 +101,23 @@ class ReportService:
 
         query = query.limit(report.page_size).offset(report.page).all()
 
-        query_list = []
-
-        for record in query:
-            query_list.append(record.as_dict())
-
+        report: Report
         id_sum_list = []
-        for item in query_list:
-            if item.get('category_id') is not None:
-                item.update({"category": self.__get_up_category_tree(
-                    item.get('category_id'))})
-
-            id_sum_list.append(item.get('id'))
-            item.update({'amount': item.get('amount')/100})
-            del item['id']
-            del item['type_operation']
-            del item['user_id']
-            del item['category_id']
-
-        #TODO не забыть добавить
+        for record in query:
+            categories = self.__get_up_category_tree(record.categoy_id)
+            report.operation.append(ReportOperation(amount=record.amount,
+                                                    description=record.description,
+                                                    datetime=record.datetime,
+                                                    category=categories))
+            id_sum_list.append(record.id)
         result_sum = ((
-            self.session.query(func.sum(OperationModel.amount))
-                .filter(and_(OperationModel.id.in_(id_sum_list),
-                             OperationModel.type_operation == 'consumption'))).scalar())
-
+                          self.session.query(func.sum(OperationModel.amount))
+                              .filter(and_(OperationModel.id.in_(id_sum_list),
+                                           OperationModel.type_operation == 'consumption'))).scalar())
         if result_sum is not None:
-            result_sum = result_sum / 100
+            report.result_sum = result_sum / 100
 
-        return jsonify(query_list)
+        return report
 
     def __get_category_by_id(self, category_id):
         """
@@ -145,7 +135,7 @@ class ReportService:
             tree.extend(a)
         return tree
 
-    def __get_up_category_tree(self, category_id):
+    def __get_up_category_tree(self, category_id) -> List[CategoryOperation]:
         """
         rises up the category tree
         :param category_id: id children category
@@ -171,11 +161,8 @@ class ReportService:
             category_list.append(self.session.query(CategoryModel).filter(
                 CategoryModel.id == category.as_dict().get('children_id')).first())
 
-        return_category_list = []
+        return_category_list: List[CategoryOperation] = []
         for item in category_list:
-            item = item.as_dict()
-            del item['user_id']
-            return_category_list.append(item)
-
+            return_category_list.append(CategoryOperation(id=item.id, name=item.name))
         return return_category_list
 
