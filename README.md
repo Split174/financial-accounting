@@ -12,10 +12,10 @@
 
  ## Установка:
  <code>
- git clone https://github.com/Split174/financial-accounting accountFinance
- pip3 install poetry
- cd accountFinance/financial-accounting
- poetry install
+ git clone https://github.com/Split174/financial-accounting accountFinance\
+ pip3 install poetry\
+ cd accountFinance/financial-accounting\
+ poetry install\
  </code>
 
 
@@ -24,10 +24,10 @@
     <code>bash start.sh</code>
  - Windows: 
     <code>
-      set PYTHONPATH=./src
-      set FLASK_APP=app:create_app
-      set FLASK_ENV=development
-      flask run
+      set PYTHONPATH=./src\
+      set FLASK_APP=app:create_app\
+      set FLASK_ENV=development\
+      flask run\
     </code>
 
   
