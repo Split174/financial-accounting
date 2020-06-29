@@ -38,6 +38,7 @@ class CategoryService:
         :param category: Category(dataclass)
         :return: new category
         """
+        category.name = category.name.lower()
         if category.parent_id is not None and self.__get_category_model_by_id(
                 category.parent_id) is None:
             raise CategoryIdDoesNotExist()
@@ -173,7 +174,7 @@ class CategoryService:
     def __get_category_model_by_name(self, name: str) -> Optional[CategoryModel]:
         """get category model by NAME"""
         return self.session.query(CategoryModel).filter(
-            and_(func.lower(CategoryModel.name) == name.lower(),
+            and_(CategoryModel.name == name,
                  CategoryModel.user_id == self.user_id)).first()
 
     def __change_category_name(self, category_id: int,
