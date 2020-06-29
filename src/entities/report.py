@@ -2,10 +2,13 @@
 the module contains dataclasses
 :classes:
 Report - dataclass from input data
+ReportGet - dataclass for list with total
+ReportOperation - date class for list items
+CategoryOperation - dataclass for dictionary items
 """
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List
 from decimal import Decimal
 
 
@@ -23,20 +26,29 @@ class Report:
 
 
 @dataclass
-class Report:
-    result_sum: Decimal
+class ReportGet:
+    """
+    dataclass for list with total
+    """
+    result_sum: Optional[Decimal]
     operation: List["ReportOperation"]
 
 
 @dataclass
 class ReportOperation:
+    """
+    dataclass for list items
+    """
     amount: Decimal
     description: str
     datetime: datetime
-    category: List["Category"]
+    category: List["CategoryOperation"]
 
 
 @dataclass
 class CategoryOperation:
+    """
+    dataclass for dictionary items
+    """
     id: int
     name: str
