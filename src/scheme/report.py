@@ -81,6 +81,7 @@ class GetReportScheme(BaseSchema):
     scheme for processing the total amount and data list
     """
     __entity_class__ = ReportGet
+    result_income = fields.Decimal(as_string=True, missing=None)
     result_sum = fields.Decimal(as_string=True, missing=None)
     operation = fields.Nested("ReportOperationScheme", many=True)
 

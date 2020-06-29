@@ -30,6 +30,7 @@ class ReportGet:
     """
     dataclass for list with total
     """
+    result_income: Optional[Decimal]
     result_sum: Optional[Decimal]
     operation: List["ReportOperation"]
 

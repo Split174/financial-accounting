@@ -116,10 +116,19 @@ class ReportService:
                             .filter(and_(OperationModel.id.in_(id_sum_list),
                                          OperationModel.type_operation ==
                                          'consumption'))).scalar())
+        result_income = ((
+                        self.session.query(func.sum(OperationModel.amount))
+                            .filter(and_(OperationModel.id.in_(id_sum_list),
+                                         OperationModel.type_operation ==
+                                         'income'))
+                          ).scalar())
+
         if result_sum is not None:
             result_sum = result_sum / 100
-
-        return ReportGet(operation=operations, result_sum=result_sum)
+        if result_income is not None:
+            result_income = result_income / 100
+        return ReportGet(operation=operations, result_sum=result_sum,
+                         result_income=result_income)
 
     def __get_category_by_id(self, category_id: int) -> list:
         """
