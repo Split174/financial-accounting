@@ -14,9 +14,8 @@
  <code>
  git clone https://github.com/Split174/financial-accounting accountFinance <br>
  pip3 install poetry <br>
- cd accountFinance <br>
- poetry init <br>
- poetry install <br>
+ cd accountFinance/financial-accounting <br>
+ poetry install
  </code>
 
 
@@ -24,5 +23,12 @@
  - Linux: <br>
     <code>bash start.sh</code>
  - Windows: <br>
+    <code>
+      set PYTHONPATH=./src <br>
+      set FLASK_APP=app:create_app<br>
+      set FLASK_ENV=development<br>
+      flask run
+    </code>
+
   
  
