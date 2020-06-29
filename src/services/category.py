@@ -76,6 +76,7 @@ class CategoryService:
             raise CategoryParentDoesNotExist()
 
         if category.name is not None:
+            category.name = category.name.lower()
             self.__change_category_name(category.id, category.name)
         if category.parent_id != -1:
             self.__change_category_parent_id(category.id, category.parent_id)
