@@ -2,10 +2,13 @@
 the module contains schemes for validation
 :classes:
 ReportScheme - validates input data
+GetReportScheme - scheme for processing the total amount and data list
+ReportOperationScheme - scheme for processing list items
+CategoryOperationScheme - scheme for processing the id and name in category
 """
 from marshmallow import ValidationError, fields, validates, validates_schema
 from scheme.base_scheme import BaseSchema
-from entities.report import Report
+from entities.report import Report, ReportGet, ReportOperation, CategoryOperation
 
 
 class ReportScheme(BaseSchema):
@@ -73,4 +76,34 @@ class ReportScheme(BaseSchema):
                                   'или даты на выбор')
 
 
+class GetReportScheme(BaseSchema):
+    """
+    scheme for processing the total amount and data list
+    """
+    __entity_class__ = ReportGet
+    result_sum = fields.Decimal(as_string=True, missing=None)
+    operation = fields.Nested("ReportOperationScheme", many=True)
+
+
+class ReportOperationScheme(BaseSchema):
+    """
+    scheme for processing list items
+    """
+    __entity_class__ = ReportOperation
+    amount = fields.Decimal(as_string=True)
+    description = fields.String(missing=None)
+    datetime = fields.DateTime()
+    category = fields.Nested("CategoryOperationScheme", many=True, missing=None)
+
+
+class CategoryOperationScheme(BaseSchema):
+    """
+    scheme for processing the id and name in category
+    """
+    __entity_class__ = CategoryOperation
+    id = fields.Integer()
+    name = fields.String()
+
+
 report_scheme = ReportScheme()
+report_get_scheme = GetReportScheme()

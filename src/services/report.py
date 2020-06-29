@@ -6,17 +6,11 @@ ReportDataError - class exception with incorrect data
 ReportCategoryError - class with the exception of a nonexistent entity
 """
 from models import OperationModel, CategoryModel, LevelCategoryModel
-from sqlalchemy import func, and_, orm, literal, alias, select, between
-from services.category import CategoryService
-from flask import jsonify
-from entities.category import CategoryTree
-from datetime import datetime, timezone, date, timedelta
-import time
-from dateutil.relativedelta import relativedelta
-from src.ready_date import get_date
-import calendar
-from entities.report import Report, ReportOperation, CategoryOperation
-from src.exceptions import ServiceError
+from sqlalchemy import func, and_, between
+from datetime import datetime
+from ready_date import get_date
+from entities.report import ReportOperation, CategoryOperation, ReportGet, Report
+from exceptions import ServiceError
 from typing import List
 
 
@@ -47,7 +41,7 @@ class ReportService:
         self.session = session
         self.user_id = user_id
 
-    def get_report(self, report):
+    def get_report(self, report: Report) -> ReportGet:
         """
         generates a report on the specified parameters
         :param report: data for search
@@ -68,11 +62,13 @@ class ReportService:
                                     OperationModel.category_id ==
                                     CategoryModel.id)
         else:
+
             query_category_id = (
                 self.session.query(CategoryModel.id)
                 .filter(and_(CategoryModel.name == report.category_name,
                              CategoryModel.user_id == self.user_id)).scalar()
             )
+
             if query_category_id is None:
                 raise ReportCategoryError
 
@@ -101,25 +97,31 @@ class ReportService:
 
         query = query.limit(report.page_size).offset(report.page).all()
 
-        report: Report
+        operations = []
         id_sum_list = []
         for record in query:
-            categories = self.__get_up_category_tree(record.categoy_id)
-            report.operation.append(ReportOperation(amount=record.amount,
-                                                    description=record.description,
-                                                    datetime=record.datetime,
-                                                    category=categories))
+            categories = None
+            if record.category_id is not None:
+                categories = self.__get_up_category_tree(record.category_id)
+            amount = record.amount
+            if amount is not None:
+                amount = amount / 100
+            operations.append(ReportOperation(amount=amount,
+                                              description=record.description,
+                                              datetime=record.datetime,
+                                              category=categories))
             id_sum_list.append(record.id)
         result_sum = ((
-                          self.session.query(func.sum(OperationModel.amount))
-                              .filter(and_(OperationModel.id.in_(id_sum_list),
-                                           OperationModel.type_operation == 'consumption'))).scalar())
+                        self.session.query(func.sum(OperationModel.amount))
+                            .filter(and_(OperationModel.id.in_(id_sum_list),
+                                         OperationModel.type_operation ==
+                                         'consumption'))).scalar())
         if result_sum is not None:
-            report.result_sum = result_sum / 100
+            result_sum = result_sum / 100
 
-        return report
+        return ReportGet(operation=operations, result_sum=result_sum)
 
-    def __get_category_by_id(self, category_id):
+    def __get_category_by_id(self, category_id: int) -> list:
         """
         builds a category tree
         :param category_id: id parent category
@@ -135,7 +137,7 @@ class ReportService:
             tree.extend(a)
         return tree
 
-    def __get_up_category_tree(self, category_id) -> List[CategoryOperation]:
+    def __get_up_category_tree(self, category_id: int) -> List[CategoryOperation]:
         """
         rises up the category tree
         :param category_id: id children category

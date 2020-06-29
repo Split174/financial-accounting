@@ -9,7 +9,7 @@ from marshmallow import ValidationError
 from auth_required import auth_required
 from database import db
 from services.report import ReportService
-from scheme.report import report_scheme
+from scheme.report import report_scheme, report_get_scheme
 from services.report import ReportCategoryError
 bp = Blueprint('report', __name__)
 
@@ -35,6 +35,7 @@ class ReportView(MethodView):
             return_report = service.get_report(report)
         except ReportCategoryError as rep_err:
             return rep_err.message, 404
+        return_report = report_get_scheme.dump(return_report)
         return return_report, 200
 
 
