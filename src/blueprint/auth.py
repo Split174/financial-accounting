@@ -15,7 +15,7 @@ from marshmallow import ValidationError
 from database import db
 from services.auth import AuthService
 from flask.views import MethodView
-from services.auth import UserNotFoundOrInfidelsData
+from services.auth import UserNotFoundOrInvalidData
 
 bp = Blueprint('auth', __name__)
 
@@ -38,7 +38,7 @@ class UserLogin(MethodView):
         auth_service = AuthService(db.connection)
         try:
             auth_user = auth_service.authorization(auth)
-        except UserNotFoundOrInfidelsData as user_er:
+        except UserNotFoundOrInvalidData as user_er:
             return user_er.message, 404
         session['user_id'] = auth_user
         return {"answer": "Вы вошли в аккаунт"}, 200
