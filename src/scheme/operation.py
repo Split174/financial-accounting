@@ -27,11 +27,19 @@ class OperationSchema(BaseSchema):
 
     @validates('type_operation')
     def validate_type_operation(self, data_type):
+        """
+        validates data input
+        :param data_type: type of transaction
+        """
         if data_type != 'consumption' and data_type != 'income':
             raise ValidationError('Доступны операции consumption или income')
 
     @validates('amount')
     def validate_amount(self, amount):
+        """
+        validates data input
+        :param amount: amount
+        """
         if amount < 0:
             raise ValidationError('Ввод отрицательного числа запрещен')
 

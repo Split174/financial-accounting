@@ -25,7 +25,7 @@ class EntityDoesNotExistError(OperationDataError):
     """
     class with the exception of a nonexistent entity
     """
-    message = {"answer": "Cущности не существует"}, 404
+    message = {"answer": "Cущности не существует"}
 
 
 class OperationServices:
