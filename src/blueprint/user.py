@@ -21,12 +21,12 @@ bp = Blueprint('user', __name__)
 class UserView(MethodView):
     """
     class for registering and gets a user
-    :methods:
-    post - receives user data and registers him
-    get - returns user data
-    user id - id user in session, in this place is a stub
     """
     def post(self):
+        """
+        receives user data and registers him
+        :return: data user in josn format
+        """
         request_json = request.json
         try:
             user = scheme.user.user_schema.load(request_json)
@@ -34,17 +34,21 @@ class UserView(MethodView):
             return jsonify(ValidEr.messages), 400
         service = UserService(db.connection)
         try:
-            user = service.post_user(user=user)
-        except ThisEmailAlreadyUse:
-            return {"answer": "Данный email уже используется"}, 400
-        return user, 201
+            user = service.create_user(user=user)
+        except ThisEmailAlreadyUse as email_er:
+            return email_er.message, 400
+        return jsonify(scheme.user.get_user_schema.dump(user)), 201
 
     @auth_required
     def get(self, user_id):
+        """
+        returns user data
+        :param user_id: id user in session
+        :return: data user in josn format
+        """
         service = UserService(db.connection)
-        user = service.get_user()
-        user_return = scheme.user.get_user_schema.dump(user)
-        return user_return, 200
+        user = service.get_user(user_id=user_id)
+        return jsonify(scheme.user.get_user_schema.dump(user)), 200
 
 
 bp.add_url_rule('', view_func=UserView.as_view('user'))

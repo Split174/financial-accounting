@@ -9,3 +9,29 @@
  - [Концептуальная модель](https://drive.google.com/file/d/1pAKVBMlXmoawyK5nfflwhfDzvdU9OdWp/view) 
  - [Логическая модель](https://drive.google.com/file/d/1cGC8YWOpqPNwhYeId6UYIvbG5T2vCuWk/view) 
  - [Физическая модель](https://dbdesign.online/model/pSDA2teLCIHQ)
+
+ ## Установка:
+
+ git clone https://github.com/Split174/financial-accounting 
+
+ accountFinance
+
+ pip3 install poetry
+
+ cd accountFinance/financial-accounting
+
+ poetry install
+ 
+
+
+ ## Запуск:
+ - Linux:  
+    bash start.sh
+ - Windows: 
+      set PYTHONPATH=./src
+
+      set FLASK_APP=app:create_app
+
+      set FLASK_ENV=development
+
+      flask run

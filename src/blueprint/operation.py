@@ -13,82 +13,86 @@ from scheme.operation import (operation_schema,
 from auth_required import auth_required
 from services.operation import OperationServices
 from database import db
-from services.operation import InsertDataFaled, OperationOrCategoryNotFound
+from services.operation import EntityDoesNotExistError
 bp = Blueprint('operation', __name__)
 
 
 class OperationView(MethodView):
     """
     class for add, delete, update, get operation
-    :methods:
-    post - add operation
-    :param:
-    user_id - id user in session
-
-    patch - update operation
-    :param:
-    user_id - id user in session
-    operation_id - id transfer operation
-
-    delete - delete operation
-    :param:
-    user_id - id user in session
-    operation_id - id transfer operation
-
-    get - get operation
-    :param:
-    user_id - id user in session
-    operation_id - id transfer operation
     """
     @auth_required
     def post(self, user_id):
+        """
+        add operation
+        :param user_id: id user in session
+        :return: transaction data in the format json
+        """
         request_json = request.json
         try:
             operation = operation_schema.load(request_json)
-        except ValidationError as ValEr:
-            return jsonify(ValEr.messages), 400
+        except ValidationError as val_er:
+            return jsonify(val_er.messages), 400
         services = OperationServices(db.connection, user_id=user_id)
         try:
-            operation_return = services.post_operation(operation)
-        except InsertDataFaled:
-            return {"answer": "Входные данные введены неверно"}, 400
+            operation_return = services.create_operation(operation)
+        except EntityDoesNotExistError as entity_er:
+            return entity_er.message, 404
         operation_return = get_operation_schema.dump(operation_return)
         return jsonify(operation_return), 200
 
     @auth_required
     def patch(self, operation_id, user_id):
+        """
+        update operation
+        :param operation_id: id transfer operation
+        :param user_id: id user in session
+        :return: transaction data in the format json
+        """
         request_json = request.json
         try:
             operation = update_operation_schema.load(request_json)
-        except ValidationError as ValEr:
-            return jsonify(ValEr.messages), 400
+        except ValidationError as val_er:
+            return jsonify(val_er.messages), 400
         services = OperationServices(db.connection, operation_id=operation_id,
                                      user_id=user_id)
         try:
-            operation_return = services.patch_operation(operation)
-        except OperationOrCategoryNotFound:
-            return {"answer": "Операции или категории не существует"}, 400
+            operation_return = services.update_operation(operation)
+        except EntityDoesNotExistError as entity_er:
+            return entity_er.message, 404
         operation_return = get_operation_schema.dump(operation_return)
         return jsonify(operation_return), 200
 
     @auth_required
     def delete(self, operation_id, user_id):
+        """
+        delete operation
+        :param operation_id: id transfer operation
+        :param user_id: id user in session
+        :return: message in format dict
+        """
         services = OperationServices(db.connection, operation_id=operation_id,
                                      user_id=user_id)
         try:
             operation_return = services.del_operation()
-        except OperationOrCategoryNotFound:
-            return {"answer": "Операции не существует"}, 400
+        except EntityDoesNotExistError as entity_er:
+            return entity_er.message, 404
         return operation_return, 200
 
     @auth_required
     def get(self, operation_id, user_id):
+        """
+        get operation
+        :param operation_id: id transfer operation
+        :param user_id: id user in session
+        :return: transaction data in the format json
+        """
         services = OperationServices(db.connection, operation_id=operation_id,
                                      user_id=user_id)
         try:
             operation_return = services.get_operation()
-        except OperationOrCategoryNotFound:
-            return {"answer": "Данной операции не существует"}, 400
+        except EntityDoesNotExistError as entity_er:
+            return entity_er.message, 404
         operation_return = get_operation_schema.dump(operation_return)
         return jsonify(operation_return), 200
 

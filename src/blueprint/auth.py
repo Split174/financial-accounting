@@ -15,7 +15,7 @@ from marshmallow import ValidationError
 from database import db
 from services.auth import AuthService
 from flask.views import MethodView
-from services.auth import UserNotFoundOrInfidelsData
+from services.auth import UserNotFoundOrInvalidData
 
 bp = Blueprint('auth', __name__)
 
@@ -23,10 +23,12 @@ bp = Blueprint('auth', __name__)
 class UserLogin(MethodView):
     """
     this class holds authorization user
-    :methods:
-    post - accepts user data and authorizes him
     """
     def post(self):
+        """
+        accepts user data and authorizes him
+        :return: answer and status
+        """
         request_json = request.json
         try:
             auth = scheme.auth.auth_schema.load(request_json)
@@ -35,20 +37,22 @@ class UserLogin(MethodView):
 
         auth_service = AuthService(db.connection)
         try:
-            auth_user = auth_service.post_auth(auth)
-        except UserNotFoundOrInfidelsData:
-            return {"answer": "Данного пользователя не существует"
-                              " или введены неверные данные"}, 400
-        return auth_user, 200
+            auth_user = auth_service.authorization(auth)
+        except UserNotFoundOrInvalidData as user_er:
+            return user_er.message, 404
+        session['user_id'] = auth_user
+        return {"answer": "Вы вошли в аккаунт"}, 200
 
 
 class UserLogout(MethodView):
     """
     this class holds deauthorization user
-    :methods:
-    post - deauthorization user
     """
     def post(self):
+        """
+        deauthorization user
+        :return: answer and status
+        """
         session.pop('user_id', None)
         return {"answer": "Выход из аккаунта произведен"}, 200
 
